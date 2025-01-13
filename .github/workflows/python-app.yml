@@ -18,14 +18,6 @@ jobs:
           - 27017:27017
 
     steps:
-      - name: Set DISPLAY environment variable
-        run: echo "DISPLAY=:99" >> $GITHUB_ENV
-      - name: Install xvfb
-        run: sudo apt-get install -y xvfb
-
-      - name: Start xvfb
-        run: Xvfb :99 -screen 0 1280x1024x24 &
-
       # Клонирование репозитория
       - name: Checkout code
         uses: actions/checkout@v3
@@ -38,22 +30,22 @@ jobs:
 
       # Установка Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: "3.9"
-
-      # Создание и активация виртуального окружения
-      - name: Set up virtual environment
-        run: python -m venv venv
-      - name: Set up virtual environment_2
-        run: source venv/bin/activate
 
       # Установка Python-зависимостей
       - name: Install dependencies
         run: |
+          sudo apt-get install -y xvfb
           pip install -r requirements.txt
           pip install pytest-xvfb
 
       # Запуск тестов
       - name: Run tests
-        run: pytest
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 &
+          pytest
+        env:
+          DISPLAY: :99
